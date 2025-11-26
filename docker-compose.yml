@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  kali:
+    image: kalilinux/kali-rolling
+    container_name: lab_kali
+    command: ["tail", "-f", "/dev/null"]
+    tty: true
+    privileged: true
+    volumes:
+      - ./tools:/home/kali/tools
+    networks:
+      - labnet
+
+  juice:
+    image: bkimminich/juice-shop:latest
+    container_name: lab_juice
+    ports:
+      - "3000:3000"
+    networks:
+      - labnet
+
+  dvwa:
+    image: vulnerables/web-dvwa:latest
+    container_name: lab_dvwa
+    ports:
+      - "80:80"
+    depends_on:
+      - dvwa_db
+    networks:
+      - labnet
+
+  dvwa_db:
+    image: mysql:5.7
+    container_name: lab_dvwa_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dvwa
+      MYSQL_USER: dvwa
+      MYSQL_PASSWORD: dvwa
+    networks:
+      - labnet
+
+  vuln-api:
+    build: ./infra/vuln-api
+    container_name: lab_vuln_api
+    ports:
+      - "4000:4000"
+    networks:
+      - labnet
+
+  # Logging stack: Grafana + Loki + Promtail (lightweight log aggregation)
+  loki:
+    image: grafana/loki:2.8.2
+    container_name: lab_loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./infra/logging/loki-config.yaml:/etc/loki/local-config.yaml:ro
+    networks:
+      - labnet
+
+  grafana:
+    image: grafana/grafana:9.5.2
+    container_name: lab_grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - loki
+    networks:
+      - labnet
+
+  promtail:
+    image: grafana/promtail:2.8.2
+    container_name: lab_promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+      - ./infra/logging/promtail-config.yaml:/etc/promtail/config.yaml:ro
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - labnet
+
+volumes:
+  # add named volumes here if you want persistent DB data
+
+networks:
+  labnet:
+    driver: bridge

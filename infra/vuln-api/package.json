@@ -1,0 +1,15 @@
+{
+  "name": "vuln-api",
+  "version": "1.0.0",
+  "description": "Small intentionally vulnerable API for lab exercises",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node test.js",
+    "start:secure": "node app_fixed.js",
+    "test:secure": "node test_fixed.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

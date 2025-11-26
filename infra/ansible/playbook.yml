@@ -1,0 +1,18 @@
+# Sample Ansible playbook for lab machines (example only)
+# This playbook is a template and is NOT executed by the repository.
+
+- hosts: labhosts
+  become: yes
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Ensure docker-compose is installed
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Pull required images
+      command: docker-compose -f /opt/cyber-lab/docker-compose.yml pull

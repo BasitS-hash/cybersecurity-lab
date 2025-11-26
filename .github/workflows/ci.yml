@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install vuln-api dependencies
+        run: |
+          cd infra/vuln-api
+          npm install --no-audit --no-fund
+
+      - name: Start vuln-api and run tests
+        run: |
+          # start the vulnerable API in background and run smoke tests
+          node infra/vuln-api/app.js &
+          # give node a moment to start listening
+          sleep 1
+          npm --prefix infra/vuln-api test
+
+      - name: List repository files (debug)
+        run: ls -la
