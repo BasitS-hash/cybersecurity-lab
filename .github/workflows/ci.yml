@@ -28,6 +28,10 @@ jobs:
 
       - name: Start hardened API and run fixed tests
         run: |
+          # Stop the vulnerable API so port 4000 is free for the hardened server.
+          # Use an exact match to avoid also killing app_fixed.js.
+          pkill -f "vuln-api/app\.js$" || true
+          sleep 1
           SECURE_USER=testuser SECURE_PASS=testpass node infra/vuln-api/app_fixed.js &
           sleep 2
           node infra/vuln-api/test_fixed.js

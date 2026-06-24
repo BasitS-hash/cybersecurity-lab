@@ -1,7 +1,9 @@
 {
   "ignorePatterns": [
     { "pattern": "^http://localhost" },
-    { "pattern": "^http://127" }
+    { "pattern": "^http://127" },
+    { "pattern": "^http://loki" },
+    { "pattern": "^https://github\\.com/.*/actions/workflows/.*\\.svg$" }
   ],
   "httpStatusCodes": {
     "200": true,
