@@ -1,5 +1,3 @@
-version: '3.8'
-
 # WARNING: This compose file starts intentionally vulnerable services.
 # Run ONLY on isolated networks or disposable VMs. Never expose to the internet.
 
