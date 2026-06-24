@@ -10,6 +10,6 @@
     "test:secure": "node test_fixed.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^5.2.1"
   }
 }
