@@ -4,14 +4,14 @@ set -euo pipefail
 # Validate docker-compose file syntax and report services
 
 echo "Validating docker-compose.yml..."
-if docker-compose config >/dev/null; then
-  echo "docker-compose: OK"
+if docker compose config --quiet; then
+  echo "docker compose config: OK"
 else
-  echo "docker-compose: INVALID"
+  echo "docker compose config: INVALID"
   exit 2
 fi
 
-echo "Listing services from compose file:"
-docker-compose config --services
+echo "Services defined in compose file:"
+docker compose config --services
 
-echo "Note: This script requires docker-compose to be installed and Docker engine to be running."
+echo "Note: This requires Docker Engine to be running."

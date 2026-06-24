@@ -1,3 +1,40 @@
+# ============================================================
+# cybersecurity-lab — project-specific ignores
+# ============================================================
+
+# Secrets — never commit
+.env
+*.env.local
+*.env.*.local
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker build artifacts
+*.tar.gz
+
+# Lab-generated output (tools/ dir is tracked via .gitkeep; add binaries inside it to ignore)
+tools/*/
+/tmp/
+compose-logs.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ============================================================
+# Python (retained for reference if Python tools are added)
+# ============================================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
