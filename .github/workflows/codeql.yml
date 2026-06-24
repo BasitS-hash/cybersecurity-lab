@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript
           queries: security-extended
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
 
       - name: Run CodeQL analysis
         # continue-on-error: code scanning upload requires GitHub Advanced Security
@@ -33,6 +33,6 @@ jobs:
         # the upload step may fail until GHAS is enabled — this does not indicate
         # a code quality regression.
         continue-on-error: true
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:javascript"
