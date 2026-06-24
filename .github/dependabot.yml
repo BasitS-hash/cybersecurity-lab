@@ -1,10 +1,18 @@
 version: 2
 updates:
+  # npm packages in the vuln-api
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/infra/vuln-api"
     schedule:
       interval: "weekly"
+    labels:
+      - "dependencies"
+
+  # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"

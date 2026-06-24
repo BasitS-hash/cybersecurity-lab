@@ -1,0 +1,19 @@
+{
+  "ignorePatterns": [
+    { "pattern": "^http://localhost" },
+    { "pattern": "^http://127" }
+  ],
+  "httpStatusCodes": {
+    "200": true,
+    "201": true,
+    "204": true,
+    "206": true,
+    "301": true,
+    "302": true,
+    "304": true
+  },
+  "timeout": "20s",
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s"
+}

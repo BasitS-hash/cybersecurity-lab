@@ -1,32 +1,68 @@
 name: Lint
 
 on:
-  pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
 
 jobs:
   shellcheck:
+    name: ShellCheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run ShellCheck on scripts
-        uses: ludeeus/action-shellcheck@v1
+        uses: ludeeus/action-shellcheck@2.0.0
         with:
-          args: "scripts/*.sh"
+          scandir: "./scripts"
 
-  node-check:
+  hadolint:
+    name: Hadolint (Dockerfile lint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-+      - name: Set up Node.js
-+        uses: actions/setup-node@v4
-+        with:
-+          node-version: '18'
-+      - name: Install vuln-api deps
-+        run: |
-+          cd infra/vuln-api
-+          npm install --no-audit --no-fund
-+      - name: Run vuln-api tests
-+        run: |
-+          npm --prefix infra/vuln-api test
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: infra/vuln-api/Dockerfile
+
+  yamllint:
+    name: YAML lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Lint YAML files
+        run: |
+          yamllint -d "{extends: relaxed, rules: {line-length: {max: 140}}}" \
+            docker-compose.yml \
+            .github/workflows/*.yml \
+            infra/logging/loki-config.yaml \
+            infra/logging/promtail-config.yaml \
+            .github/dependabot.yml
+
+  compose-validate:
+    name: docker compose config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate docker-compose.yml
+        run: docker compose config --quiet
+
+  node-tests:
+    name: vuln-api Node tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Install vuln-api deps
+        run: npm install --no-audit --no-fund
+        working-directory: infra/vuln-api
+      - name: Run vuln-api smoke tests
+        run: |
+          node infra/vuln-api/app.js &
+          sleep 2
+          npm --prefix infra/vuln-api test
