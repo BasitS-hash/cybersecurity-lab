@@ -1,0 +1,22 @@
+# Gitleaks configuration for cybersecurity-lab
+# Allow patterns for INTENTIONAL demo credentials in the vulnerable API.
+# These are fake credentials that only work inside the isolated lab network
+# and are clearly labelled as educational/vulnerable.
+
+title = "cybersecurity-lab gitleaks config"
+
+[allowlist]
+  description = "Intentional demo credentials in vulnerable API and docs"
+  paths = [
+    "infra/vuln-api/app.js",
+    "challenges/",
+    ".env.example",
+  ]
+  regexes = [
+    # Demo token in app.js: 'super-secret-token'
+    "super-secret-token",
+    # Demo password in app.js: 'password'
+    "password.*=.*['\"]password['\"]",
+    # env.example placeholder values
+    "changeme",
+  ]

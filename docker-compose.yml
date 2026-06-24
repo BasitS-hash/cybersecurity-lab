@@ -1,5 +1,8 @@
 version: '3.8'
 
+# WARNING: This compose file starts intentionally vulnerable services.
+# Run ONLY on isolated networks or disposable VMs. Never expose to the internet.
+
 services:
   kali:
     image: kalilinux/kali-rolling
@@ -16,62 +19,79 @@ services:
     image: bkimminich/juice-shop:latest
     container_name: lab_juice
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - labnet
+    restart: unless-stopped
 
   dvwa:
     image: vulnerables/web-dvwa:latest
     container_name: lab_dvwa
     ports:
-      - "80:80"
+      - "127.0.0.1:80:80"
     depends_on:
       - dvwa_db
     networks:
       - labnet
+    restart: unless-stopped
 
   dvwa_db:
     image: mysql:5.7
     container_name: lab_dvwa_db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: dvwa
-      MYSQL_USER: dvwa
-      MYSQL_PASSWORD: dvwa
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dvwa}
+      MYSQL_USER: ${MYSQL_USER:-dvwa}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dvwa}
+    volumes:
+      - dvwa_db_data:/var/lib/mysql
     networks:
       - labnet
+    restart: unless-stopped
 
+  # INTENTIONALLY VULNERABLE — do not expose publicly
   vuln-api:
-    build: ./infra/vuln-api
+    build:
+      context: ./infra/vuln-api
+      dockerfile: Dockerfile
     container_name: lab_vuln_api
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     networks:
       - labnet
+    restart: unless-stopped
+    labels:
+      - "lab.intentionally-vulnerable=true"
+      - "lab.description=Custom vulnerable Node API for educational exercises"
 
-  # Logging stack: Grafana + Loki + Promtail (lightweight log aggregation)
+  # Logging stack: Grafana + Loki + Promtail
   loki:
     image: grafana/loki:2.8.2
     container_name: lab_loki
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./infra/logging/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
     networks:
       - labnet
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:9.5.2
     container_name: lab_grafana
     ports:
-      - "3002:3000"
+      - "127.0.0.1:3002:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
     depends_on:
       - loki
+    volumes:
+      - grafana_data:/var/lib/grafana
     networks:
       - labnet
+    restart: unless-stopped
 
   promtail:
     image: grafana/promtail:2.8.2
@@ -83,10 +103,14 @@ services:
     command: -config.file=/etc/promtail/config.yaml
     networks:
       - labnet
+    restart: unless-stopped
 
 volumes:
-  # add named volumes here if you want persistent DB data
+  dvwa_db_data:
+  loki_data:
+  grafana_data:
 
 networks:
   labnet:
     driver: bridge
+    # internal: true  # uncomment to completely block internet access from containers
